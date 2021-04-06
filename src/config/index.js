@@ -13,7 +13,12 @@ var config = {
     name: "Api Base",
     version: "1.0.0",
     host: process.env.API_HOST || '0.0.0.0',
-    port: process.env.API_PORT || 5000
+    port: process.env.API_PORT || 5000,
+    ssl: {
+      enabled: process.env.API_SSL_ENABLED || 'off',
+      key: process.env.API_SSL_KEY_PATH,
+      cert: process.env.API_SSL_CERT_PATH
+    }
   },
   mongodb: {
     uri: process.env.MONGODB_URI,

@@ -6,7 +6,10 @@
  */
 
 const createError = require('http-errors');
+const http = require('http');
+const https = require('https');
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const morganLogger = require('morgan');
 const rfs = require('rotating-file-stream');
@@ -81,8 +84,18 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
       res.status(err.status || 500);
       res.render('error');
     });
+    
+    let server = http.createServer(app);
 
-    app.listen(config.api.port, config.api.host, () => {
+    if (config.api.ssl.enabled === "on") {
+      let privateKey  = fs.readFileSync(config.api.ssl.key, 'utf8');
+      let certificate = fs.readFileSync(config.api.ssl.cert, 'utf8');
+
+      let credentials = { key: privateKey, cert: certificate };
+      server = https.createServer(credentials, app);
+    }
+
+    server.listen(config.api.port, config.api.host, () => {
       console.log(`Started up at http://${config.api.host}:${config.api.port}`);
     });
   });
