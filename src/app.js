@@ -84,7 +84,7 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
       res.status(err.status || 500);
       res.render('error');
     });
-    
+
     let server = http.createServer(app);
 
     if (config.api.ssl.enabled === "on") {

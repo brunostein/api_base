@@ -174,6 +174,7 @@ const ApiAccountController = {
               access_token: token,
               token_type: apiSettings.tokenAuthScheme,
               token_expires_in: apiSettings.accessTokenExpiresIn,
+              refresh_token: apiAccount.refresh_token
             },
             msg: "Token refreshed successfully."
           }
