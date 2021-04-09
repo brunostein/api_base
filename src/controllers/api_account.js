@@ -160,7 +160,7 @@ const ApiAccountController = {
         // Check if refresh token is valid
         jwt.verify(apiAccount.refresh_token, apiSettings.refreshTokenSecret, async function(err, refreshTokenData) {
           if (err !== null || refreshTokenData === undefined || refreshTokenData.username !== apiAccount.username) {
-            return res.status(201).send({ success: false, msg: "Refresh Token expired." });
+            return res.status(401).send({ success: false, msg: "Refresh Token expired." });
           }
 
           // Generate new Access Token
