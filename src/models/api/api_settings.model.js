@@ -17,7 +17,7 @@ const apiSettingsSchema =  {
   refreshTokenEnabled: { type: String, required: true, default: "off" },
   refreshTokenSecret: { type: String, required: true },
   refreshTokenExpiresIn: { type: String, default: null }
-}
+};
 
 const ApiSettingsSchema = new mongoose.Schema(
   apiSettingsSchema, 

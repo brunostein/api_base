@@ -47,7 +47,7 @@ const install = () => new Promise((resolve, reject) => {
         refreshTokenEnabled: process.env.API_REFRESH_TOKEN_ENABLED,
         refreshTokenSecret: process.env.API_REFRESH_TOKEN_SECRET,
         refreshTokenExpiresIn: process.env.API_REFRESH_TOKEN_EXPIRES_IN
-      }
+      };
 
       let apiSettingsObj = new ApiSettingsModel(apiSettingsData);
       
@@ -63,12 +63,14 @@ const install = () => new Promise((resolve, reject) => {
 
         console.log("API Settings created successfully...");
         console.log("Installation completed successfully.");
+
         resolve(data);
       })
     })
   } catch (err) {
     console.log("Couldn't install the " + apiName);
     console.log(err);
+
     reject(err);
   }
 })

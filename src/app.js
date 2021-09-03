@@ -17,6 +17,7 @@ const cors = require('cors');
 const apiHelper = require('./helpers/api');
 const initMongoDBConnection = require('./helpers/db_conn');
 const config = require("./config");
+const custom = require("./custom");
 const install = require("./install");
 
 const app = express();
@@ -37,6 +38,9 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
     }
 
     global.apiSettings = apiSettings;
+
+    // Load App Customizations
+    custom.load(app);
 
     // create a rotating write stream
     const accessLogStream = rfs.createStream('access.log', {
@@ -100,3 +104,5 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
     });
   });
 });
+
+module.exports = app;

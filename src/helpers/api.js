@@ -104,6 +104,7 @@ const getToken = function (headers) {
   } catch (err) {
     console.log(err);
   }
+
   return null;
 };
 

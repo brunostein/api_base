@@ -21,7 +21,8 @@ module.exports = async function(passport) {
     let search = {
       _id: jwt_payload.id,
       username: jwt_payload.username
-    }
+    };
+
     ApiAccountModel.findOne(search).then(account => {
       return done(null, account);
     })

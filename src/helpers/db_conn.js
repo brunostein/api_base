@@ -9,7 +9,9 @@ const mongoose = require('mongoose');
 
 const initMongoDBConnection = (uri, options={}, callback) => {
   mongoose.connect(uri, options);
-  var db = mongoose.connection;
+
+  let db = mongoose.connection;
+
   db.on('error', function (err) {
     console.log('MONGODB: Failed to connect to database');
   });

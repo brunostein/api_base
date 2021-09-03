@@ -19,16 +19,18 @@ const ApiAccountController = {
         if (!isSystemScope) {
           return res.status(201).send({ success: false, msg: "Permission denied." });
         }
+
         let search = {
           scope: { "$ne": "system" }
-        }
+        };
+
         ApiAccountModel.find(search).select("-password").then(apiAccount => {
           return res.status(201).send({ success: true, data: apiAccount });
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Couldn't get the Api Account." });
+      return res.status(500).send({ success: false, msg: "Couldn't get the Api Account." });
     }
   },
 
@@ -37,13 +39,15 @@ const ApiAccountController = {
       let search = {
         _id: req.params.id,
         scope: { "$ne": "system" }
-      }
+      };
+
       ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
         return res.status(201).send({ success: true, data: apiAccount });
       });
+
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Couldn't get the Api Accounts." });
+      return res.status(500).send({ success: false, msg: "Couldn't get the Api Accounts." });
     }
   },
 
@@ -52,15 +56,16 @@ const ApiAccountController = {
       let requestData = req.body;
 
       // Check required fields
-      if ((requestData.email === undefined || requestData.username.length === 0) ||
-        (requestData.username === undefined || requestData.username.length === 0) ||
-        (requestData.password === undefined || requestData.password.length === 0) || 
-        (requestData.scope === undefined || requestData.scope.length === 0)) {
-        return res.status(201).send({ success: false, msg: "The field's (email, username, password and scope is required." });
+      if ((!requestData.email || requestData.username.length === 0) ||
+        (!requestData.username || requestData.username.length === 0) ||
+        (!requestData.password || requestData.password.length === 0) || 
+        (!requestData.scope || requestData.scope.length === 0)) {
+        return res.status(201).send({ success: false, msg: "The field's (email, username, password and scope) are required." });
       }
 
       // Check if the apiAccount exists
       let apiAccount = await ApiAccountModel.findOne({ username: requestData.username });
+
       if (apiAccount !== null) {
         return res.status(201).send({ success: false, msg: "Api Account already exists." });
       }
@@ -74,21 +79,21 @@ const ApiAccountController = {
         password: requestData.password,
         scope: requestData.scope,
         blocked: 0,
-      }
+      };
 
       let apiAccountObj = new ApiAccountModel(apiAccountData);
 
       apiAccountObj.save().then((apiAccount) => {
         if (apiAccount === null) {
           return res.status(201).send({ success: false, msg: "Couldn't create the Api Account." });
-        } else {
-          apiAccount.password = undefined;
-          return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account created successfully." });
         }
+
+        apiAccount.password = undefined;
+        return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account created successfully." });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Couldn't create the Api Account." });
+      return res.status(500).send({ success: false, msg: "Couldn't create the Api Account." });
     }
   },
 
@@ -114,18 +119,19 @@ const ApiAccountController = {
             access_token: token,
             token_type: apiSettings.tokenAuthScheme,
             token_expires_in: apiSettings.accessTokenExpiresIn,
-          }
+          };
 
           // CREATE REFRESH TOKEN
           if (apiSettings.refreshTokenEnabled === "on") {
             let refreshToken = jwt.sign({ username: apiAccount.username }, apiSettings.refreshTokenSecret, { expiresIn: apiSettings.refreshTokenExpiresIn });
-
             let success = await ApiAccountModel.updateOne({ _id: apiAccount._id }, {"refresh_token": refreshToken});
+
             if (success == null || !success.ok) {
               return res.status(201).send({ success: false, msg: "Authentication failed." });
             }
 
             responseData.refresh_token = refreshToken;
+            responseData.refresh_token_expires_in: apiSettings.refreshTokenExpiresIn;
           }
 
           return res.status(201).send({ success: true, data: responseData });
@@ -133,7 +139,7 @@ const ApiAccountController = {
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Authenticate failed." });
+      return res.status(500).send({ success: false, msg: "Authenticate failed." });
     }
   },
 
@@ -150,7 +156,7 @@ const ApiAccountController = {
       let search = {
         username: requestData.username,
         refresh_token: requestData.refresh_token
-      }
+      };
 
       ApiAccountModel.findOne(search).then(async (apiAccount) => {
         if (apiAccount === null) {
@@ -159,7 +165,7 @@ const ApiAccountController = {
 
         // Check if refresh token is valid
         jwt.verify(apiAccount.refresh_token, apiSettings.refreshTokenSecret, async function(err, refreshTokenData) {
-          if (err !== null || refreshTokenData === undefined || refreshTokenData.username !== apiAccount.username) {
+          if (err !== null || !refreshTokenData || refreshTokenData.username !== apiAccount.username) {
             return res.status(401).send({ success: false, msg: "Refresh Token expired." });
           }
 
@@ -177,14 +183,14 @@ const ApiAccountController = {
               refresh_token: apiAccount.refresh_token
             },
             msg: "Token refreshed successfully."
-          }
+          };
 
           return res.status(201).send(responseData);
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Access Token Refresh failed." });
+      return res.status(500).send({ success: false, msg: "Access Token Refresh failed." });
     }
   },
 
@@ -207,9 +213,10 @@ const ApiAccountController = {
           username: requestData.username,
           refresh_token: requestData.refresh_token,
           scope: { "$ne": "system" } 
-        }
+        };
 
         let apiAccount = await ApiAccountModel.findOne(search);
+
         if (apiAccount === null) {
           return res.status(201).send({ success: false, msg: "Api Account not found." });
         }
@@ -218,12 +225,13 @@ const ApiAccountController = {
           if (updated === null || !updated.ok) {
             return res.status(201).send({ success: false, msg: "Refresh token revoke failed." });
           }
+
           return res.status(201).send({ success: true, msg: "Refresh token revoked successfully." });
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Couldn't revoke the Refresh Token." });
+      return res.status(500).send({ success: false, msg: "Couldn't revoke the Refresh Token." });
     }
   },
 
@@ -231,27 +239,28 @@ const ApiAccountController = {
     try {
       let requestData = req.body;
 
-      if (requestData.password === undefined || requestData.password.length === 0) {
+      if (!requestData.password || requestData.password.length === 0) {
         return res.status(201).send({ success: false, msg: "Password is required." });
       }
 
-      var search = {
+      let search = {
         _id: req.params.id,
         scope: { "$ne": "system" } 
-      }
+      };
 
       ApiAccountModel.findOne(search).then(async apiAccount => {
-
         if (apiAccount === null) {
           return res.status(201).send({ success: false, msg: "Api Account not found." });
         }
 
         // Check if the api apiAccount exists
         if (requestData.username != apiAccount.username) {
-          var search = {
+          let search = {
             username: requestData.username
-          }
+          };
+
           let apiAccountExists = await ApiAccountModel.findOne(search);
+
           if (apiAccountExists !== null) {
             return res.status(201).send({ success: false, msg: "The Api Account already exists." });
           }
@@ -260,41 +269,45 @@ const ApiAccountController = {
         requestData.password_hash = bcrypt.hashSync(requestData.password, bcrypt.genSaltSync(10), null);
 
         let apiAccountData = {};
-        if (requestData.email !== undefined) {
+
+        if (requestData.email) {
           apiAccountData.email = requestData.email;
         }
-        if (requestData.username !== undefined) {
+        if (requestData.username) {
           apiAccountData.username = requestData.username;
         }
-        if (requestData.scope !== undefined) {
+        if (requestData.scope) {
           apiAccountData.scope = requestData.scope;
         }
-        if (requestData.scope !== undefined) {
+        if (requestData.scope) {
           apiAccountData.blocked = requestData.blocked;
         }
 
         if (Object.keys(apiAccountData).length === 0) {
-          return res.status(201).send({ success: false, msg: "Coundn't update Api Account: Empty fields." });
+          return res.status(201).send({ success: false, msg: "Couldn't update Api Account: Empty fields." });
         }
 
         ApiAccountModel.updateOne({ _id: req.params.id }, apiAccountData).then(success => {
           if (success === null || !success.ok) {
-            return res.status(201).send({ success: false,  msg: "Coundn't update Api Account." });
+            return res.status(201).send({ success: false,  msg: "Couldn't update Api Account." });
           }
-          var search = {
+
+          let search = {
             _id: req.params.id
-          }
+          };
+
           ApiAccountModel.findOne(search).then(apiAccount => {
             if (apiAccount === null) {
-              return res.status(201).send({ success: false, msg: "Coundn't update Api Account." });
+              return res.status(201).send({ success: false, msg: "Couldn't update Api Account." });
             }
+
             return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account updated successfully." });
            });
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Coundn't update Api Account." });
+      return res.status(500).send({ success: false, msg: "Couldn't update Api Account." });
     }
   },
 
@@ -307,30 +320,30 @@ const ApiAccountController = {
 
         let data = {
           blocked: 1
-        }
+        };
 
         ApiAccountModel.updateOne({ _id: req.params.id }, data).then(success => {
-          if (success === null || ! success.ok) {
+          if (success === null || !success.ok) {
             return res.status(201).send({ success: false, msg: "Couldn't block the Api Account." });
           }
 
           let search = {
             _id: req.params.id,
             scope: { "$ne": "system" } 
-          }
+          };
 
-          ApiAccountModel.findOne(search).then(apiAccount => {
+          ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
             if (apiAccount === null) {
               return res.status(201).send({ success: false, msg: "Api Account not found." });
             }
-            apiAccount.password = undefined;
+
             return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account blocked successfully." });
           });
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Coundn't block the Api Account." });
+      return res.status(500).send({ success: false, msg: "Couldn't block the Api Account." });
     }
   },
 
@@ -343,33 +356,34 @@ const ApiAccountController = {
 
         let data = {
           blocked: 0
-        }
+        };
 
         let search = { 
           _id: req.params.id, 
           scope: { "$ne": "system" } 
-        }
+        };
 
         ApiAccountModel.updateOne(search, data).then(success => {
-          if (success === null || ! success.ok) {
+          if (success === null || !success.ok) {
             return res.status(201).send({ success: false, msg: "Couldn't unblock the Api Account." });
           }
 
           let search = {
             _id: req.params.id
-          }
-          ApiAccountModel.findOne(search).then(apiAccount => {
+          };
+
+          ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
             if (apiAccount === null) {
               return res.status(201).send({ success: false, msg: "Api Account not found." });
             }
-            apiAccount.password = undefined;
+
             return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account unblocked successfully." });
           });
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Coundn't Unblock the Api Account." });
+      return res.status(500).send({ success: false, msg: "Couldn't unblock the Api Account." });
     }
   },
 
@@ -383,18 +397,19 @@ const ApiAccountController = {
         let search = {
           _id: req.params.id,
           scope: { "$ne": "system" } 
-        }
+        };
 
         ApiAccountModel.deleteOne(search).then(success => {
           if (success === null || !success.ok) {
             return res.status(201).send({ success: false, msg: "Couldn't remove the Api Account." });
           }
+
           return res.status(201).send({ success: true, msg: "Api Account removed successfully." });
         });
       });
     } catch (err) {
       console.log(err);
-      return res.status(400).send({ success: false, msg: "Coundn't remove the Api Account." });
+      return res.status(500).send({ success: false, msg: "Couldn't remove the Api Account." });
     }
   }
 }

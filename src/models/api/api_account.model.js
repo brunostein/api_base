@@ -14,7 +14,7 @@ const apiAccountSchema =  {
   scope: { type: String, required: true },
   refresh_token: { type: String, default: null },
   blocked: { type: Boolean, default: 0 }
-}
+};
 
 const ApiAccountSchema = new mongoose.Schema(
   apiAccountSchema, 

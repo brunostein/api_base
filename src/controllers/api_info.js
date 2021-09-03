@@ -16,12 +16,13 @@ const ApiInfoController = {
         let info = {
           api: config.api,
           settings: global.apiSettings
-        }
+        };
+
         return res.status(201).send({ success: true, data: info });
       });
     } catch (err) {
       console.log(err);
-      return res.status(201).send({ success: false, msg: "Couldn't get the Api Info." });
+      return res.status(500).send({ success: false, msg: "Couldn't get the Api Info." });
     }
   },
 
