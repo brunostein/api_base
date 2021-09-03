@@ -63,7 +63,7 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
     app.use(morganLogger('combined', { stream: accessLogStream }));
     app.use(express.static(path.join(__dirname, 'public')));
 
-    app.use(apiHelper.checkBlockedAccountMiddleware);
+    app.use(apiHelper.apiMiddleware);
     app.use(require('./routes/api'));
     app.use(require('./routes/web'));
 

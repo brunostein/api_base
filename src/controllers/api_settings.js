@@ -46,7 +46,8 @@ const apiSettings = {
           accessTokenExpiresIn: data.accessTokenExpiresIn,
           refreshTokenEnabled: data.refreshTokenEnabled,
           refreshTokenSecret: data.refreshTokenSecret,
-          refreshTokenExpiresIn: data.refreshTokenExpiresIn
+          refreshTokenExpiresIn: data.refreshTokenExpiresIn,
+          storeAccessesHistoryEnabled: data.storeAccessesHistoryEnabled
         };
 
         ApiSettingsModel.updateOne({}, apiSettingsData).then(success => {

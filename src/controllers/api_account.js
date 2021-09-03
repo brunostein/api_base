@@ -9,6 +9,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const config = require("../config");
 const ApiAccountModel = require("../models/api/api_account.model");
+const ApiRefreshTokenModel = require("../models/api/api_refresh_tokens.model");
+const ApiAccessHistoryModel = require("../models/api/api_accesses_history.model");
 const ApiHelper = require('../helpers/api');
 
 const ApiAccountController = {
@@ -101,13 +103,18 @@ const ApiAccountController = {
     try {
       let requestData = req.body;
 
-      ApiAccountModel.findOne({ username: requestData.username }).then((apiAccount) => {
+      ApiAccountModel.findOne({ username: requestData.username }).then(async (apiAccount) => {
         if (apiAccount == null) {
           return res.json({ success: false, msg: "Authentication failed. Api Account not found." });
         }
 
+        apiAccount.auth_stats.total_attempts = apiAccount.auth_stats.total_attempts+1;
+
         bcrypt.compare(requestData.password, apiAccount.password).then(async (isMatch) => {
           if (!isMatch) {
+            apiAccount.auth_stats.total_failed = apiAccount.auth_stats.total_failed+1;
+            await apiAccount.save();
+
             return res.status(201).send({ success: false, msg: 'Authentication failed, wrong username or password.' });
           }
 
@@ -124,17 +131,30 @@ const ApiAccountController = {
           // CREATE REFRESH TOKEN
           if (apiSettings.refreshTokenEnabled === "on") {
             let refreshToken = jwt.sign({ username: apiAccount.username }, apiSettings.refreshTokenSecret, { expiresIn: apiSettings.refreshTokenExpiresIn });
-            let success = await ApiAccountModel.updateOne({ _id: apiAccount._id }, {"refresh_token": refreshToken});
 
-            if (success == null || !success.ok) {
-              return res.status(201).send({ success: false, msg: "Authentication failed." });
+            let refreshTokenData = {
+              username: apiAccount.username,
+              refresh_token: refreshToken
+            };
+
+            let refreshTokenCreated = await ApiRefreshTokenModel.create(refreshTokenData);
+
+            if (refreshTokenCreated === null) {
+              apiAccount.auth_stats.total_failed = apiAccount.auth_stats.total_failed+1;
+              await apiAccount.save();
+
+              return res.status(201).send({ success: false, msg: "Authentication failed. Couldn't create the refresh token." });
             }
 
             responseData.refresh_token = refreshToken;
             responseData.refresh_token_expires_in = apiSettings.refreshTokenExpiresIn;
           }
 
-          return res.status(201).send({ success: true, data: responseData });
+          apiAccount.auth_stats.total_success = apiAccount.auth_stats.total_success+1;
+          apiAccount.auth_stats.last = Date.now();
+          await apiAccount.save();
+
+          return res.status(201).send({ success: true, data: responseData, msg: "Authenticated successfully" });
         });
       });
     } catch (err) {
@@ -158,16 +178,35 @@ const ApiAccountController = {
         refresh_token: requestData.refresh_token
       };
 
-      ApiAccountModel.findOne(search).then(async (apiAccount) => {
-        if (apiAccount === null) {
-          return res.status(201).send({ success: false, msg: "Api Account not found." });
+      ApiRefreshTokenModel.findOne(search).then(async (userRefreshToken) => {
+        if (userRefreshToken === null) {
+          return res.status(201).send({ success: false, msg: "Refresh Token not found." });
+        }
+
+        userRefreshToken.refresh_stats.total_attempts = userRefreshToken.refresh_stats.total_attempts+1;
+
+        if (userRefreshToken.revoked === true) {
+          userRefreshToken.refresh_stats.total_failed = userRefreshToken.refresh_stats.total_failed+1;
+          await userRefreshToken.save();
+
+          return res.status(401).send({ success: false, msg: "Refresh Token is revoked." });
         }
 
         // Check if refresh token is valid
-        jwt.verify(apiAccount.refresh_token, apiSettings.refreshTokenSecret, async function(err, refreshTokenData) {
-          if (err !== null || !refreshTokenData || refreshTokenData.username !== apiAccount.username) {
+        jwt.verify(userRefreshToken.refresh_token, apiSettings.refreshTokenSecret, async function(err, refreshTokenData) {
+
+          if (err !== null || !refreshTokenData || refreshTokenData.username !== userRefreshToken.username) {
+            userRefreshToken.refresh_stats.total_failed = userRefreshToken.refresh_stats.total_failed+1;
+            await userRefreshToken.save();
+
             return res.status(401).send({ success: false, msg: "Refresh Token expired." });
           }
+          
+          let search = {
+            username: userRefreshToken.username
+          };
+
+          let apiAccount = await ApiAccountModel.findOne(search);
 
           // Generate new Access Token
           let token = jwt.sign({ id: apiAccount._id, username: apiAccount.username }, apiSettings.accessTokenSecret, {expiresIn: apiSettings.accessTokenExpiresIn});
@@ -175,15 +214,14 @@ const ApiAccountController = {
           let responseData = {
             success: true,
             data: {
-              username: apiAccount.username,
-              scope: apiAccount.scope,
-              access_token: token,
-              token_type: apiSettings.tokenAuthScheme,
-              token_expires_in: apiSettings.accessTokenExpiresIn,
-              refresh_token: apiAccount.refresh_token
+              access_token: token
             },
             msg: "Token refreshed successfully."
           };
+
+          userRefreshToken.refresh_stats.total_success = userRefreshToken.refresh_stats.total_success+1;
+          userRefreshToken.refresh_stats.last = Date.now();
+          await userRefreshToken.save();
 
           return res.status(201).send(responseData);
         });
@@ -212,22 +250,22 @@ const ApiAccountController = {
         let search = {
           username: requestData.username,
           refresh_token: requestData.refresh_token,
-          scope: { "$ne": "system" } 
         };
 
-        let apiAccount = await ApiAccountModel.findOne(search);
+        let refreshToken = await ApiRefreshTokenModel.findOne(search);
 
-        if (apiAccount === null) {
-          return res.status(201).send({ success: false, msg: "Api Account not found." });
+        if (refreshToken === null) {
+          return res.status(201).send({ success: false, msg: "Refresh Token not found." });
         }
 
-        ApiAccountModel.updateOne({ _id: apiAccount._id}, {"refresh_token": null}).then(updated => {
-          if (updated === null || !updated.ok) {
-            return res.status(201).send({ success: false, msg: "Refresh token revoke failed." });
-          }
+        let authorizationData = await ApiHelper.getAuthorizationInfo(req.headers);
 
-          return res.status(201).send({ success: true, msg: "Refresh token revoked successfully." });
-        });
+        refreshToken.revoked = 1;
+        refreshToken.revoked_at = Date.now();
+        refreshToken.revoked_by_username = authorizationData.username;
+        refreshToken.save();
+
+        return res.status(201).send({ success: true, msg: "Refresh token revoked successfully." });
       });
     } catch (err) {
       console.log(err);
@@ -248,13 +286,13 @@ const ApiAccountController = {
         scope: { "$ne": "system" } 
       };
 
-      ApiAccountModel.findOne(search).then(async apiAccount => {
+      ApiAccountModel.findOne(search).then(async (apiAccount) => {
         if (apiAccount === null) {
           return res.status(201).send({ success: false, msg: "Api Account not found." });
         }
 
         // Check if the api apiAccount exists
-        if (requestData.username != apiAccount.username) {
+        if (requestData.username !== apiAccount.username) {
           let search = {
             username: requestData.username
           };
@@ -287,8 +325,8 @@ const ApiAccountController = {
           return res.status(201).send({ success: false, msg: "Couldn't update Api Account: Empty fields." });
         }
 
-        ApiAccountModel.updateOne({ _id: req.params.id }, apiAccountData).then(success => {
-          if (success === null || !success.ok) {
+        apiAccount.save(apiAccountData).then(apiAccountUpdated => {
+          if (apiAccountUpdated === null) {
             return res.status(201).send({ success: false,  msg: "Couldn't update Api Account." });
           }
 
@@ -296,13 +334,7 @@ const ApiAccountController = {
             _id: req.params.id
           };
 
-          ApiAccountModel.findOne(search).then(apiAccount => {
-            if (apiAccount === null) {
-              return res.status(201).send({ success: false, msg: "Couldn't update Api Account." });
-            }
-
-            return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account updated successfully." });
-           });
+          return res.status(201).send({ success: true, data: apiAccountUpdated, msg: "Api Account updated successfully." });
         });
       });
     } catch (err) {
@@ -316,28 +348,22 @@ const ApiAccountController = {
       ApiHelper.checkSystemScope(req).then((isSystemScope) => {
         if (!isSystemScope) {
           return res.status(201).send({ success: false, msg: "Permission denied." });
-        }
+        }   
 
-        let data = {
-          blocked: 1
+        let search = {
+          _id: req.params.id,
         };
 
-        ApiAccountModel.updateOne({ _id: req.params.id }, data).then(success => {
-          if (success === null || !success.ok) {
-            return res.status(201).send({ success: false, msg: "Couldn't block the Api Account." });
+        ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
+          if (apiAccount === null) {
+            return res.status(201).send({ success: false, msg: "Couldn't block. Api Account not found." });
           }
 
-          let search = {
-            _id: req.params.id,
-            scope: { "$ne": "system" } 
-          };
+          apiAccount.blocked = true;
 
-          ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
-            if (apiAccount === null) {
-              return res.status(201).send({ success: false, msg: "Api Account not found." });
-            }
-
-            return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account blocked successfully." });
+          apiAccount.save().then(apiAccountUpdated => {
+            console.log(apiAccountUpdated);
+            return res.status(201).send({ success: true, data: apiAccountUpdated, msg: "Api Account blocked successfully." });
           });
         });
       });
@@ -352,32 +378,21 @@ const ApiAccountController = {
       ApiHelper.checkSystemScope(req).then((isSystemScope) => {
         if (!isSystemScope) {
           return res.status(201).send({ success: false, msg: "Permission denied." });
-        }
+        }   
 
-        let data = {
-          blocked: 0
+        let search = {
+          _id: req.params.id,
         };
 
-        let search = { 
-          _id: req.params.id, 
-          scope: { "$ne": "system" } 
-        };
-
-        ApiAccountModel.updateOne(search, data).then(success => {
-          if (success === null || !success.ok) {
-            return res.status(201).send({ success: false, msg: "Couldn't unblock the Api Account." });
+        ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
+          if (apiAccount === null) {
+            return res.status(201).send({ success: false, msg: "Couldn't unblock. Api Account not found." });
           }
 
-          let search = {
-            _id: req.params.id
-          };
+          apiAccount.blocked = false;
 
-          ApiAccountModel.findOne(search).select("-password").then(apiAccount => {
-            if (apiAccount === null) {
-              return res.status(201).send({ success: false, msg: "Api Account not found." });
-            }
-
-            return res.status(201).send({ success: true, data: apiAccount, msg: "Api Account unblocked successfully." });
+          apiAccount.save().then(apiAccountUpdated => {
+            return res.status(201).send({ success: true, data: apiAccountUpdated, msg: "Api Account unblocked successfully." });
           });
         });
       });
@@ -389,20 +404,32 @@ const ApiAccountController = {
 
   remove: (req, res) => {
     try {
-      ApiHelper.checkSystemScope(req).then((isSystemScope) => {
+      ApiHelper.checkSystemScope(req).then(async (isSystemScope) => {
         if (!isSystemScope) {
           return res.status(201).send({ success: false, msg: "Permission denied." });
         }
 
         let search = {
           _id: req.params.id,
-          scope: { "$ne": "system" } 
         };
 
-        ApiAccountModel.deleteOne(search).then(success => {
+        let apiAccount = await ApiAccountModel.findOne(search);
+
+        if (apiAccount === null) {
+          return res.status(201).send({ success: false, msg: "Couldn't remove the Api Account. User not found." });
+        }
+
+        ApiAccountModel.deleteOne(search).then(async (success) => {
           if (success === null || !success.ok) {
             return res.status(201).send({ success: false, msg: "Couldn't remove the Api Account." });
           }
+
+          let search = {
+            username: apiAccount.username
+          };
+
+          await ApiRefreshTokenModel.remove(search);
+          await ApiAccessHistoryModel.remove(search);
 
           return res.status(201).send({ success: true, msg: "Api Account removed successfully." });
         });

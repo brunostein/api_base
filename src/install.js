@@ -46,7 +46,8 @@ const install = () => new Promise((resolve, reject) => {
         accessTokenExpiresIn: process.env.API_ACCESS_TOKEN_EXPIRES_IN,
         refreshTokenEnabled: process.env.API_REFRESH_TOKEN_ENABLED,
         refreshTokenSecret: process.env.API_REFRESH_TOKEN_SECRET,
-        refreshTokenExpiresIn: process.env.API_REFRESH_TOKEN_EXPIRES_IN
+        refreshTokenExpiresIn: process.env.API_REFRESH_TOKEN_EXPIRES_IN,
+        storeAccessesHistoryEnabled: process.env.API_STORE_ACCESSES_HISTORY_ENABLED
       };
 
       let apiSettingsObj = new ApiSettingsModel(apiSettingsData);

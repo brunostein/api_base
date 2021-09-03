@@ -7,13 +7,13 @@
 
 const mongoose = require("mongoose");
 
-const apiAccountSchema =  {
-  email: { type: String, required: false, unique: true },
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  scope: { type: String, required: true },
-  blocked: { type: Boolean, default: 0 },
-  auth_stats: {
+const apiRefreshTokesSchema =  {
+  username: { type: String, required: true },
+  refresh_token: { type: String, required: true },
+  revoked: { type: Boolean, default: 0 },
+  revoked_at: { type: Date, default: null },
+  revoked_by_username: { type: String, default: null },
+  refresh_stats: {
     total_attempts: { type: Number, default: 0 },
     total_success: { type: Number, default: 0 },
     total_failed: { type: Number, default: 0 },
@@ -21,9 +21,9 @@ const apiAccountSchema =  {
   }
 };
 
-const ApiAccountSchema = new mongoose.Schema(
-  apiAccountSchema, 
+const ApiRefreshTokensSchema = new mongoose.Schema(
+  apiRefreshTokesSchema, 
   {timestamps: true}
 );
 
-module.exports = mongoose.model("api_accounts", ApiAccountSchema);
+module.exports = mongoose.model("api_accounts_refresh_tokens", ApiRefreshTokensSchema);

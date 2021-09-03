@@ -16,7 +16,8 @@ const apiSettingsSchema =  {
   accessTokenExpiresIn: { type: String, required: true },
   refreshTokenEnabled: { type: String, required: true, default: "off" },
   refreshTokenSecret: { type: String, required: true },
-  refreshTokenExpiresIn: { type: String, default: null }
+  refreshTokenExpiresIn: { type: String, default: null },
+  storeAccessesHistoryEnabled: { type: String, required: true, default: "off" }
 };
 
 const ApiSettingsSchema = new mongoose.Schema(
@@ -24,4 +25,4 @@ const ApiSettingsSchema = new mongoose.Schema(
   {timestamps: true}
 );
 
-module.exports = mongoose.model("Settings", ApiSettingsSchema);
+module.exports = mongoose.model("api_settings", ApiSettingsSchema);

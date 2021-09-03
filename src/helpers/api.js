@@ -6,15 +6,17 @@
  */
 
 const jwt = require('jsonwebtoken');
+const requestIp = require('request-ip');
 const ApiAccountModel = require("../models/api/api_account.model");
 const ApiSettingsModel = require("../models/api/api_settings.model");
+const ApiAccessesHistoryModel = require("../models/api/api_accesses_history.model");
 
 const getApiSettings = async () => {
   let settings = await ApiSettingsModel.findOne();
   return settings;
 }
 
-const checkBlockedAccountMiddleware = async (req, res, next) => {
+const apiMiddleware = async (req, res, next) => {
   try {
     if (!req.originalUrl.match("/api") || req.originalUrl.match("/accounts/signup")) {
       next();
@@ -38,6 +40,17 @@ const checkBlockedAccountMiddleware = async (req, res, next) => {
     if (username === null) {
       next();
       return;
+    }
+
+    // STORE ACCESSES HISTORY
+    if (global.apiSettings.storeAccessesHistoryEnabled === "on") {
+      let historyData = {
+        username,
+        api_endpoint: req.originalUrl,
+        ipaddress: requestIp.getClientIp(req) || null
+      };
+
+      await ApiAccessesHistoryModel.create(historyData);
     }
 
     // Check Blocked Account
@@ -110,7 +123,7 @@ const getToken = function (headers) {
 
 const apiHelper = {
   getApiSettings,
-  checkBlockedAccountMiddleware,
+  apiMiddleware,
   checkScope,
   checkSystemScope,
   getAuthorizationInfo,
