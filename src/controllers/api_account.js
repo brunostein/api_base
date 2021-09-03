@@ -131,7 +131,7 @@ const ApiAccountController = {
             }
 
             responseData.refresh_token = refreshToken;
-            responseData.refresh_token_expires_in: apiSettings.refreshTokenExpiresIn;
+            responseData.refresh_token_expires_in = apiSettings.refreshTokenExpiresIn;
           }
 
           return res.status(201).send({ success: true, data: responseData });
