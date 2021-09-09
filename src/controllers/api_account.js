@@ -189,7 +189,7 @@ const ApiAccountController = {
           userRefreshToken.refresh_stats.total_failed = userRefreshToken.refresh_stats.total_failed+1;
           await userRefreshToken.save();
 
-          return res.status(401).send({ success: false, msg: "Refresh Token is revoked." });
+          return res.status(401).send({ success: false, msg: "Refresh Token was revoked." });
         }
 
         // Check if refresh token is valid

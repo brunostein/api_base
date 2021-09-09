@@ -7,27 +7,12 @@ services:
             context: .
         image: img-api-base
         restart: unless-stopped
-        environment:
-            API_SSL_ENABLED: "off"
-            API_SSL_KEY_PATH: 
-            API_SSL_CERT_PATH: 
-            API_PORT: 4000
-            API_NAME: "API Base"
-            API_DESCR: "Your Api description"
-            API_TOKEN_AUTH_SCHEME: JWT_or_Bearer
-            API_ACCESS_TOKEN_SECRET: your_access_token_secret
-            API_ACCESS_TOKEN_EXPIRES_IN: 5m
-            API_REFRESH_TOKEN_ENABLED: "on_or_off"
-            API_REFRESH_TOKEN_SECRET: your_refresh_token_secret
-            API_REFRESH_TOKEN_EXPIRES_IN: 1h
-            API_ROOT_ACCOUNT_EMAIL: your_root_account_email
-            API_ROOT_ACCOUNT_USER: your_root_account_username
-            API_ROOT_ACCOUNT_PASS: your_root_account_pass
-            MONGODB_URI: mongodb://username:password@db:27017/api_base?authSource=admin
+        env_file: ./src/.env
         volumes:
             - ./src:/api_base
+            - /api_base/node_modules
         ports:
-            - 5000:4000
+            - 4000:4000
         depends_on:
             - db
 
