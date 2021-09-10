@@ -6,11 +6,11 @@
  */
 
 const express = require('express');
+const passport = require('passport');
 const router = express.Router();
+const ApiUtilController = require("../../../controllers/api_util");
+require('../../../config/passport')(passport);
 
-router.use('/utils', require('./api_util'));
-router.use('/info', require('./api_info'));
-router.use('/accounts', require('./api_account'));
-router.use('/settings', require('./api_settings'));
+router.get('/ping', passport.authenticate('jwt', { session: false }), ApiUtilController.ping);
 
 module.exports = router;
