@@ -362,7 +362,6 @@ const ApiAccountController = {
           apiAccount.blocked = true;
 
           apiAccount.save().then(apiAccountUpdated => {
-            console.log(apiAccountUpdated);
             return res.status(201).send({ success: true, data: apiAccountUpdated, msg: "Api Account blocked successfully." });
           });
         });
