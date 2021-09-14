@@ -9,6 +9,7 @@ const rootPath = require('app-root-path');
 require('dotenv').config({ 'path': rootPath + "/.env" });
 
 var config = {
+  rootPath: rootPath,
   api: {
     name: "Api Base",
     version: "1.0.0",

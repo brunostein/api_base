@@ -6,12 +6,11 @@
  */
 
 const express = require('express');
+const passport = require('passport');
 const router = express.Router();
+const ApiLogController = require("../../../controllers/api_log");
+require('../../../config/passport')(passport);
 
-router.use('/utils', require('./api_util'));
-router.use('/info', require('./api_info'));
-router.use('/accounts', require('./api_account'));
-router.use('/settings', require('./api_settings'));
-router.use('/logs', require('./api_log'));
+router.get('/get-lines', passport.authenticate('jwt', { session: false }), ApiLogController.getLogLines);
 
 module.exports = router;
