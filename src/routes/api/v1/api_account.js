@@ -11,9 +11,61 @@ const router = express.Router();
 const ApiAccountController = require("../../../controllers/api_account");
 require('../../../config/passport')(passport);
 
+/**
+ * @swagger
+ * /accounts/get:
+ *   get:
+ *     summary: Retrieve a list of API Accounts
+ *     description: Retrieve a list of API Accounts.
+ *     parameters:
+ *       - 
+ *         name: authorization
+ *         in: header
+ *         description: an authorization header
+ *         required: true
+ *         type: string
+ *     security:
+ *       - Bearer: []
+ *     responses:
+ *       200:
+ *         description: Return the API Accounts list
+ *         content:
+ *           application/json:
+ *              scheme:
+ *                type: array
+*/
 router.get('/get', passport.authenticate('jwt', { session: false }), ApiAccountController.getAll);
 router.get('/get/:id', passport.authenticate('jwt', { session: false }), ApiAccountController.getId);
 router.post('/signup', passport.authenticate('jwt', { session: false }), ApiAccountController.signUp);
+
+/**
+ * @swagger
+ * /accounts/signin:
+ *   post:
+ *     summary: Create a JSONPlaceholder user.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The API Account username.
+ *                 example: api_account_username
+ *               password:
+ *                 type: string
+ *                 description: The API Account password.
+ *                 example: api_account_username_password
+ *     responses:
+ *       200:
+ *         description: Return access_token and refresh_token for authentication
+ *         content:
+ *           application/json:
+ *              scheme:
+ *                type: object
+*/
 router.post('/signin', ApiAccountController.signIn);
 router.post('/refresh-token', ApiAccountController.refreshToken);
 router.post('/refresh-token/revoke', passport.authenticate('jwt', { session: false }), ApiAccountController.refreshTokenRevoke);

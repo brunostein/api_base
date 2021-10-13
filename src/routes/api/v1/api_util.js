@@ -12,5 +12,7 @@ const ApiUtilController = require("../../../controllers/api_util");
 require('../../../config/passport')(passport);
 
 router.get('/ping', passport.authenticate('jwt', { session: false }), ApiUtilController.ping);
+router.get('/shutdown', passport.authenticate('jwt', { session: false }), ApiUtilController.shutdown);
+router.get('/reboot', passport.authenticate('jwt', { session: false }), ApiUtilController.reboot);
 
 module.exports = router;

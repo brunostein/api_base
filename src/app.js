@@ -14,13 +14,13 @@ const path = require('path');
 const morganLogger = require('morgan');
 const rfs = require('rotating-file-stream');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
 const apiHelper = require('./helpers/api');
 const initMongoDBConnection = require('./helpers/db_conn');
 const config = require("./config");
-const custom = require("./custom");
 const install = require("./install");
-
 const app = express();
+
 global.apiSettings = null;
 
 initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
@@ -40,7 +40,12 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
     global.apiSettings = apiSettings;
 
     // Load App Customizations
+    const custom = require("./custom");
     custom.load(app);
+
+    // Swagger DOC
+    const swaggerSpec = require('./swagger');
+    app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     // create a rotating write stream
     const accessLogStream = rfs.createStream('access.log', {
@@ -55,9 +60,9 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
     app.use(cors());
 
     // Parse application/x-www-form-urlencoded
-    app.use(express.urlencoded({ extended: false }))
+    app.use(express.urlencoded({ extended: false }));
     // Parse application/json
-    app.use(express.json())
+    app.use(express.json());
 
     app.use(morganLogger('dev'));
     app.use(morganLogger('combined', { stream: accessLogStream }));

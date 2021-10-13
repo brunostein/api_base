@@ -9,7 +9,7 @@ const config = require('../config');
 const ApiSettingsModel = require("../models/api/api_settings.model");
 const apiHelper = require('../helpers/api');
 
-const apiSettings = {
+const ApiSettingsController = {
 
   get: (req, res) => {
     try {
@@ -60,8 +60,6 @@ const apiSettings = {
               return res.status(201).send({ success: false,  msg: "Couldn't get the Api Settings." });
             }
 
-            global.apiSettings = newApiSettings;
-
             return res.status(201).send({ success: true, data: newApiSettings, msg: "Api Settings updated successfully."  });
           });
         });
@@ -73,4 +71,4 @@ const apiSettings = {
   }
 }
 
-module.exports = apiSettings;
+module.exports = ApiSettingsController;
