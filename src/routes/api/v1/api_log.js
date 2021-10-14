@@ -11,6 +11,34 @@ const router = express.Router();
 const ApiLogController = require("../../../controllers/api_log");
 require('../../../config/passport')(passport);
 
+/**
+ * @swagger
+ * /logs/get-lines:
+ *   get:
+ *     summary: Get Access Log Lines
+ *     tags:
+ *       - Api Logs
+ *     parameters:
+ *       - in: query
+ *         name: lines
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Total lines
+ *       - in: query
+ *         name: filters
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: String to filter lines
+ *     responses:
+ *       201:
+ *         description: Return Access Log Lines
+ *         content:
+ *           application/json:
+ *             scheme:
+ *               type: array
+*/
 router.get('/get-lines', passport.authenticate('jwt', { session: false }), ApiLogController.getLogLines);
 
 module.exports = router;

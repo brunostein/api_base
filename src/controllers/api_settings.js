@@ -5,7 +5,6 @@
  * Written by Bruno B. Stein <bruno.stein@tifx.com.br>, 2021
  */
 
-const config = require('../config');
 const ApiSettingsModel = require("../models/api/api_settings.model");
 const apiHelper = require('../helpers/api');
 
@@ -36,32 +35,63 @@ const ApiSettingsController = {
         }
 
         let data = req.body;
+        let apiSettingsData = {};
 
-        let apiSettingsData = {
-          port: data.port,
-          name: data.name,
-          descr: data.descr,
-          tokenAuthScheme: data.tokenAuthScheme,
-          accessTokenSecret: data.accessTokenSecret,
-          accessTokenExpiresIn: data.accessTokenExpiresIn,
-          refreshTokenEnabled: data.refreshTokenEnabled,
-          refreshTokenSecret: data.refreshTokenSecret,
-          refreshTokenExpiresIn: data.refreshTokenExpiresIn,
-          storeAccessesHistoryEnabled: data.storeAccessesHistoryEnabled
-        };
+        if (data.companyName) {
+          apiSettingsData.companyName = data.companyName;
+        }
+        if (data.companyWebsite) {
+          apiSettingsData.companyWebsite = data.companyWebsite;
+        }
+        if (data.companySupportEmail) {
+          apiSettingsData.companySupportEmail = data.companySupportEmail;
+        }
+        if (data.name) {
+          apiSettingsData.name = data.name;
+        }
+        if (data.descr) {
+          apiSettingsData.descr = data.descr;
+        }
+        if (data.tokenAuthScheme) {
+          apiSettingsData.tokenAuthScheme = data.tokenAuthScheme;
+        }
+        if (data.accessTokenSecret) {
+          apiSettingsData.accessTokenSecret = data.accessTokenSecret;
+        }
+        if (data.accessTokenExpiresIn) {
+          apiSettingsData.accessTokenExpiresIn = data.accessTokenExpiresIn;
+        }
+        if (data.refreshTokenEnabled) {
+          apiSettingsData.refreshTokenEnabled = data.refreshTokenEnabled;
+        }
+        if (data.refreshTokenSecret) {
+          apiSettingsData.refreshTokenSecret = data.refreshTokenSecret;
+        }
+        if (data.refreshTokenExpiresIn) {
+          apiSettingsData.refreshTokenExpiresIn = data.refreshTokenExpiresIn;
+        }
+        if (data.storeAccessesHistoryEnabled) {
+          apiSettingsData.storeAccessesHistoryEnabled = data.storeAccessesHistoryEnabled;
+        }
+        if (data.swaggerHost) {
+          apiSettingsData.swaggerHost = data.swaggerHost;
+        }
+        if (data.swaggerPort) {
+          apiSettingsData.swaggerPort = data.swaggerPort;
+        }
+        if (data.swaggerPath) {
+          apiSettingsData.swaggerPath = data.swaggerPath;
+        }
 
-        ApiSettingsModel.updateOne({}, apiSettingsData).then(success => {
-          if (success === null || !success.ok) {
-            return res.status(201).send({ success: false,  msg: "Couldn't update the Api Settings." });
+        // Need Reboot after update
+        apiSettingsData.needReboot = true;
+
+        ApiSettingsModel.findOneAndUpdate({}, apiSettingsData, { returnOriginal: false }).then(newApiSettings => {
+          if (newApiSettings === null) {
+            return res.status(201).send({ success: false,  msg: "Couldn't get the Api Settings." });
           }
 
-          ApiSettingsModel.findOne().then(newApiSettings => {
-            if (newApiSettings === null) {
-              return res.status(201).send({ success: false,  msg: "Couldn't get the Api Settings." });
-            }
-
-            return res.status(201).send({ success: true, data: newApiSettings, msg: "Api Settings updated successfully."  });
-          });
+          return res.status(201).send({ success: true, data: newApiSettings, msg: "Api Settings updated successfully. It is necessary restart the API for the changes to take effect."  });
         });
       });
     } catch (err) {

@@ -5,21 +5,21 @@
  * Written by Bruno B. Stein <bruno.stein@tifx.com.br>, 2021
  */
 
-const fs = require('fs');
 const { spawn } = require('child_process');
-const ApiHelper = require('../helpers/api');
+const apiHelper = require('../helpers/api');
 
 const ApiUtilController = {
 
   shutdown: (req, res) => {
     try {
-      ApiHelper.checkSystemScope(req).then((isSystemScope) => {
+      apiHelper.checkSystemScope(req).then((isSystemScope) => {
         if (!isSystemScope) {
           return res.status(201).send({ success: false, msg: "Permission denied." });
         }
 
         setTimeout(function () {
           process.on("exit", function () {
+            apiHelper.resetNeedReboot();
             return res.status(201).send({ success: true, msg: "System shut down successfully." });
           });
           process.exit();
@@ -33,7 +33,7 @@ const ApiUtilController = {
 
   reboot: (req, res) => {
     try {
-      ApiHelper.checkSystemScope(req).then((isSystemScope) => {
+      apiHelper.checkSystemScope(req).then((isSystemScope) => {
         if (!isSystemScope) {
           return res.status(201).send({ success: false, msg: "Permission denied." });
         }
@@ -45,6 +45,8 @@ const ApiUtilController = {
               detached : true,
               stdio: "inherit"
             });
+
+            apiHelper.resetNeedReboot();
             return res.status(201).send({ success: true, msg: "System restarted successfully" });
           });
           process.exit();

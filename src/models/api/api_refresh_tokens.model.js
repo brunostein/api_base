@@ -10,7 +10,7 @@ const mongoose = require("mongoose");
 const apiRefreshTokesSchema =  {
   username: { type: String, required: true },
   refresh_token: { type: String, required: true },
-  revoked: { type: Boolean, default: 0 },
+  revoked: { type: Boolean, default: false },
   revoked_at: { type: Date, default: null },
   revoked_by_username: { type: String, default: null },
   refresh_stats: {

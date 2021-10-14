@@ -12,7 +12,8 @@ const apiAccountSchema =  {
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   scope: { type: String, required: true },
-  blocked: { type: Boolean, default: 0 },
+  blocked: { type: Boolean, default: false },
+  system: { type: Boolean, default: false },
   auth_stats: {
     total_attempts: { type: Number, default: 0 },
     total_success: { type: Number, default: 0 },

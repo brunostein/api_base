@@ -12,7 +12,7 @@ const ApiAccountModel = require('../models/api/api_account.model');
 module.exports = async function(passport) {
   
   const opts = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme(global.apiSettings.tokenAuthScheme),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme(global.apiSettings.tokenAuthScheme || ""),
     secretOrKey: global.apiSettings.accessTokenSecret,
   };
 

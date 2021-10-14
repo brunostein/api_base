@@ -11,6 +11,22 @@ const router = express.Router();
 const ApiInfoController = require("../../../controllers/api_info");
 require('../../../config/passport')(passport);
 
+/**
+ * @swagger
+ * /info/get:
+ *   get:
+ *     summary: Retrieve Api Info
+ *     description: Retrieve API Info.
+ *     tags:
+ *       - Api Info
+ *     responses:
+ *       201:
+ *         description: Return the API Info
+ *         content:
+ *           application/json:
+ *             scheme:
+ *               type: object
+*/
 router.get('/get', passport.authenticate('jwt', { session: false }), ApiInfoController.getInfo);
 
 module.exports = router;

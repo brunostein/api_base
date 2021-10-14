@@ -8,7 +8,9 @@
 const mongoose = require("mongoose");
 
 const apiSettingsSchema =  {
-  port: { type: Number, required: false },
+  companyName: { type: String, required: false },
+  companyWebsite: { type: String, required: false },
+  companySupportEmail: { type: String, required: false },
   name: { type: String, required: false },
   descr: { type: String, required: false },
   tokenAuthScheme: { type: String, required: false },
@@ -17,7 +19,11 @@ const apiSettingsSchema =  {
   refreshTokenEnabled: { type: String, required: true, default: "off" },
   refreshTokenSecret: { type: String, required: true },
   refreshTokenExpiresIn: { type: String, default: null },
-  storeAccessesHistoryEnabled: { type: String, required: true, default: "off" }
+  storeAccessesHistoryEnabled: { type: String, required: true, default: "off" },
+  needReboot: { type: Boolean, default: false },
+  swaggerHost: { type: String, default: null },
+  swaggerPort: { type: String, default: null },
+  swaggerPath: { type: String, default: null }
 };
 
 const ApiSettingsSchema = new mongoose.Schema(

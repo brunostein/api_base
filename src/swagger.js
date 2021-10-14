@@ -15,37 +15,37 @@ const swaggerDefinition = {
     version: config.api.version,
     description: global.apiSettings.descr,
     contact: {
-      name: 'TIFX Technologies',
-      url: 'https://www.tifx.com.br',
-      email: 'contato@tifx.com.br'
-    },
-    license: {
-      name: "Apache 2.0",
-      url: "https://www.apache.org/licenses/LICENSE-2.0.html"
-    },
+      name: global.apiSettings.companyName,
+      url: global.apiSettings.companyWebsite,
+      email: global.apiSettings.companySupportEmail
+    }
   },
   components: {
     securitySchemes: {
       bearerAuth: {
-        type: "http",
+        type: "apiKey",
         name: "Authorization",
         scheme: "bearer",
-        bearerFormat: "JWT",
+        "bearerFormat": "JWT",
         in: "header"
       }
     }
   },
+  security: [
+    {
+      bearerAuth: []
+    }
+  ],
   servers: [
     {
-      url: `http://${config.swagger.host}:${config.swagger.port}/api/v1`,
-      description: 'Development server',
+      url: `${global.apiSettings.swaggerHost}:${global.apiSettings.swaggerPort}/api/v1`,
+      description: global.apiSettings.name,
     },
   ],
 };
 
 const options = {
   swaggerDefinition,
-  // Path to the API docs
   apis: ['./routes/api/v1/*.js'],
 }
 

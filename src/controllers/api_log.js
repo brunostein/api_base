@@ -14,6 +14,9 @@ const ApiLogController = {
   getLogLines: (req, res) => {
     try {
       apiHelper.checkSystemScope(req).then((isSystemScope) => {
+        if (!isSystemScope) {
+          return res.status(201).send({ success: false, msg: "Permission denied." });
+        }
 
         let totalLines = req.query.lines || 15;
         let filters = req.query.filters || "";

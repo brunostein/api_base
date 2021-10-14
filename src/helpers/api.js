@@ -57,7 +57,8 @@ const apiMiddleware = async (req, res, next) => {
     ApiAccountModel.findOne({ username: username }).then((apiAccount) => {
       if (apiAccount === null) {
         return res.status(201).send({ success: false, msg: "Api Account not found." });
-      } else if (apiAccount.blocked === true) {
+      }
+      if (apiAccount.blocked === true) {
         return res.status(201).send({ success: false, msg: "Api Account blocked." }); 
       }
       next();
@@ -121,6 +122,13 @@ const getToken = function (headers) {
   return null;
 };
 
+const resetNeedReboot = async (reboot = false) => {
+  let apiSettingsData = {
+    needReboot: reboot
+  };
+  return await ApiSettingsModel.updateOne({}, apiSettingsData);
+}
+
 const apiHelper = {
   getApiSettings,
   apiMiddleware,
@@ -128,6 +136,7 @@ const apiHelper = {
   checkSystemScope,
   getAuthorizationInfo,
   getToken,
+  resetNeedReboot,
 }
 
 module.exports = apiHelper;

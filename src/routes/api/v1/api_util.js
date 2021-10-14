@@ -11,8 +11,55 @@ const router = express.Router();
 const ApiUtilController = require("../../../controllers/api_util");
 require('../../../config/passport')(passport);
 
+/**
+ * @swagger
+ * /utils/ping:
+ *   get:
+ *     summary: Ping API
+ *     tags:
+ *       - Api Utils
+ *     responses:
+ *       201:
+ *         description: Return Api Pong
+ *         content:
+ *           application/json:
+ *             scheme:
+ *               type: object
+*/
 router.get('/ping', passport.authenticate('jwt', { session: false }), ApiUtilController.ping);
+
+/**
+ * @swagger
+ * /utils/shutdown:
+ *   get:
+ *     summary: Shutdown API
+ *     tags:
+ *       - Api Utils
+ *     responses:
+ *       201:
+ *         description: Return true|false
+ *         content:
+ *           application/json:
+ *             scheme:
+ *               type: object
+*/
 router.get('/shutdown', passport.authenticate('jwt', { session: false }), ApiUtilController.shutdown);
+
+/**
+ * @swagger
+ * /utils/reboot:
+ *   get:
+ *     summary: Reboot API
+ *     tags:
+ *       - Api Utils
+ *     responses:
+ *       201:
+ *         description: Return true|false
+ *         content:
+ *           application/json:
+ *             scheme:
+ *               type: object
+*/
 router.get('/reboot', passport.authenticate('jwt', { session: false }), ApiUtilController.reboot);
 
 module.exports = router;

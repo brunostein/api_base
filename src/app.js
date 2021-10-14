@@ -37,6 +37,10 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
       process.exit(1);
     }
 
+    if (apiSettings.needReboot && apiSettings.needReboot === true) {
+      apiHelper.resetNeedReboot();
+    }
+
     global.apiSettings = apiSettings;
 
     // Load App Customizations
@@ -45,7 +49,7 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
 
     // Swagger DOC
     const swaggerSpec = require('./swagger');
-    app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.use(global.apiSettings.swaggerPath, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     // create a rotating write stream
     const accessLogStream = rfs.createStream('access.log', {
@@ -78,6 +82,7 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
       if (req.originalUrl.match("/api/")) {
         return res.status(404).send({ success: false, msg: errMessage });
       }
+      console.log(req.originalUrl);
       next(createError(404, errMessage));
     });
 

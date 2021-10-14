@@ -12,10 +12,14 @@ const ApiInfoController = {
 
   getInfo: (req, res) => {
     try {
-      apiHelper.checkSystemScope(req).then((isSystemScope) => {
+      apiHelper.checkSystemScope(req).then(async (isSystemScope) => {
+        if (!isSystemScope) {
+          return res.status(201).send({ success: false, msg: "Permission denied." });
+        }
+
         let info = {
           api: config.api,
-          settings: global.apiSettings
+          settings: await apiHelper.getApiSettings()
         };
 
         return res.status(201).send({ success: true, data: info });
