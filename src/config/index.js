@@ -32,10 +32,6 @@ var config = {
       connectTimeoutMS: 30000,
       keepAlive: 1
     }
-  },
-  swagger: {
-    host: process.env.SWAGGER_HOST,
-    port: process.env.SWAGGER_PORT
   }
 };
 
