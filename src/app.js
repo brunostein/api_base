@@ -49,7 +49,9 @@ initMongoDBConnection(config.mongodb.uri, config.mongodb.options, function() {
 
     // Swagger DOC
     const swaggerSpec = require('./swagger');
-    app.use(global.apiSettings.swaggerPath, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    if (global.apiSettings.swaggerPath !== null) {
+      app.use(global.apiSettings.swaggerPath, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    }
 
     // create a rotating write stream
     const accessLogStream = rfs.createStream('access.log', {
