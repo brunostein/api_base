@@ -253,7 +253,7 @@ const ApiAccountController = {
             userRefreshToken.refresh_stats.total_failed = userRefreshToken.refresh_stats.total_failed+1;
             await userRefreshToken.save();
 
-            return res.status(401).send({ success: false, msg: "Refresh Token was revoked." });
+            return res.status(201).send({ success: false, msg: "Refresh Token was revoked." });
           }
 
           // Check if refresh token is valid
@@ -263,7 +263,7 @@ const ApiAccountController = {
               userRefreshToken.refresh_stats.total_failed = userRefreshToken.refresh_stats.total_failed+1;
               await userRefreshToken.save();
 
-              return res.status(401).send({ success: false, msg: "Refresh Token expired." });
+              return res.status(201).send({ success: false, msg: "Refresh Token expired." });
             }
             
             let search = {
