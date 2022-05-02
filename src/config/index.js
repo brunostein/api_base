@@ -12,7 +12,7 @@ var config = {
   rootPath: rootPath,
   api: {
     name: "Api Base",
-    version: "1.0.0",
+    version: "1.0.1",
     host: process.env.API_HOST || '0.0.0.0',
     port: process.env.API_PORT || 5000,
     ssl: {
