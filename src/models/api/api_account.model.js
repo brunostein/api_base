@@ -27,4 +27,7 @@ const ApiAccountSchema = new mongoose.Schema(
   {timestamps: true}
 );
 
+ApiAccountSchema.index({username: 1});
+ApiAccountSchema.index({username: 1, password: 1});
+
 module.exports = mongoose.model("api_accounts", ApiAccountSchema);

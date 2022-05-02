@@ -7,7 +7,7 @@
 
 const mongoose = require("mongoose");
 
-const apiRefreshTokesSchema =  {
+const apiRefreshTokensSchema =  {
   username: { type: String, required: true },
   refresh_token: { type: String, required: true },
   revoked: { type: Boolean, default: false },
@@ -22,8 +22,10 @@ const apiRefreshTokesSchema =  {
 };
 
 const ApiRefreshTokensSchema = new mongoose.Schema(
-  apiRefreshTokesSchema, 
+  apiRefreshTokensSchema,
   {timestamps: true}
 );
+
+ApiRefreshTokensSchema.index({username: 1, refresh_token: 1});
 
 module.exports = mongoose.model("api_accounts_refresh_tokens", ApiRefreshTokensSchema);
