@@ -18,15 +18,16 @@ const getApiSettings = async () => {
 
 const apiMiddleware = async (req, res, next) => {
   try {
-    if (!req.originalUrl.match("/api") || req.originalUrl.match("/accounts/signup")) {
+    let url = req.originalUrl || req.url;
+
+    if (!url.match("/api") || url.match("/accounts/signup")) {
       next();
-      return;
     }
 
     let username = null;
 
-    if (req.originalUrl.match("/accounts/signin") || 
-      req.originalUrl.match("/accounts/refresh-token")) {
+    if (url.match("/accounts/signin") ||
+      url.match("/accounts/refresh-token")) {
       if (req.body.username !== undefined) {
         username = req.body.username;
       }
@@ -39,14 +40,13 @@ const apiMiddleware = async (req, res, next) => {
 
     if (username === null) {
       next();
-      return;
     }
 
     // STORE ACCESSES HISTORY
     if (global.apiSettings.storeAccessesHistoryEnabled === "on") {
       let historyData = {
         username,
-        api_endpoint: req.originalUrl,
+        api_endpoint: url,
         ipaddress: requestIp.getClientIp(req) || null
       };
 
