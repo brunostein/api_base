@@ -29,4 +29,22 @@ require('../../../config/passport')(passport);
 */
 router.get('/get', passport.authenticate('jwt', { session: false }), ApiInfoController.getInfo);
 
+/**
+ * @swagger
+ * /info/get-routes:
+ *   get:
+ *     summary: Retrieve Api Routes
+ *     description: Retrieve API Routes.
+ *     tags:
+ *       - Api Info
+ *     responses:
+ *       201:
+ *         description: Return the API Routes
+ *         content:
+ *           application/json:
+ *             scheme:
+ *               type: object
+*/
+router.get('/get-routes', passport.authenticate('jwt', { session: false }), ApiInfoController.getRoutes);
+
 module.exports = router;

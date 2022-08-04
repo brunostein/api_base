@@ -5,7 +5,7 @@
  * Written by Bruno B. Stein <bruno.stein@tifx.com.br>, 2021
  */
 
-const { spawn } = require('child_process');
+const child = require('child_process');
 const apiHelper = require('../helpers/api');
 
 const ApiUtilController = {
@@ -26,7 +26,7 @@ const ApiUtilController = {
         }, 1000);
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't shut down the system." });
     }
   },
@@ -40,7 +40,7 @@ const ApiUtilController = {
 
         setTimeout(function () {
           process.on("exit", function () {
-            spawn(process.argv.shift(), process.argv, {
+            child.spawn(process.argv.shift(), process.argv, {
               cwd: process.cwd(),
               detached : true,
               stdio: "inherit"
@@ -53,7 +53,7 @@ const ApiUtilController = {
         }, 1000);
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't restart the system." });
     }
   },
@@ -62,7 +62,7 @@ const ApiUtilController = {
     try {
       return res.status(201).send({ success: true, data: "pong" });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Ping failed." });
     }
   },

@@ -2,15 +2,15 @@ version: '3'
 
 services:
     api:
-        container_name: api-base
+        container_name: rest-api-base
         build:
             context: .
-        image: img-api-base
+        image: img-rest-api-base
         restart: unless-stopped
         env_file: ./src/.env
         volumes:
-            - ./src:/api_base
-            - /api_base/node_modules
+            - ./src:/rest_api_base
+            - /rest_api_base/node_modules
         ports:
             - 4000:4000
         depends_on:
@@ -18,7 +18,7 @@ services:
 
     db:
         image: mongo:4.1.8-xenial
-        container_name: api-base-db
+        container_name: rest-api-base-db
         restart: unless-stopped
         environment:
             - MONGO_INITDB_ROOT_USERNAME=your_mongodb_username

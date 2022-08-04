@@ -40,7 +40,7 @@ const ApiLogController = {
         });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't get the Log lines." });
     }
   },

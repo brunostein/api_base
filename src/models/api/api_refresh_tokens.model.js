@@ -7,7 +7,7 @@
 
 const mongoose = require("mongoose");
 
-const apiRefreshTokensSchema =  {
+const ApiRefreshTokensSchema = new mongoose.Schema({
   username: { type: String, required: true },
   refresh_token: { type: String, required: true },
   revoked: { type: Boolean, default: false },
@@ -19,12 +19,9 @@ const apiRefreshTokensSchema =  {
     total_failed: { type: Number, default: 0 },
     last: { type: Date }
   }
-};
-
-const ApiRefreshTokensSchema = new mongoose.Schema(
-  apiRefreshTokensSchema,
-  {timestamps: true}
-);
+}, {
+  timestamps: true
+});
 
 ApiRefreshTokensSchema.index({username: 1, refresh_token: 1});
 

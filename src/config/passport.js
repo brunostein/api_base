@@ -27,7 +27,7 @@ module.exports = async function(passport) {
       return done(null, account);
     })
     .catch((err) => {
-      console.log(err);
+      consoleLog(err);
       return done(err, false);
     });
   }));

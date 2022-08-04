@@ -7,15 +7,12 @@
 
 const mongoose = require("mongoose");
 
-const apiAccessesHistorySchema =  {
+const ApiAccessesHistorySchema = new mongoose.Schema({
   username: { type: String, required: false },
   api_endpoint: { type: String, required: false },
   ipaddress: { type: String, required: false }
-};
-
-const ApiAccessesHistorySchema = new mongoose.Schema(
-  apiAccessesHistorySchema, 
-  {timestamps: true}
-);
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model("api_acesses_history", ApiAccessesHistorySchema);

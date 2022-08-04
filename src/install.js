@@ -12,9 +12,9 @@ const config = require("./config");
 
 const install = () => new Promise((resolve, reject) => {
   try {
-    let apiName = process.env.API_NAME;
+    let apiName = config.api.name;
 
-    console.log("Installing " + apiName + "...");
+    consoleLog("Installing " + apiName + "...");
 
     let userData = {
       email: process.env.API_ROOT_ACCOUNT_EMAIL,
@@ -27,17 +27,17 @@ const install = () => new Promise((resolve, reject) => {
 
     let ApiAccountObj = new ApiAccountModel(userData);
 
-    console.log("Creating ROOT Account...");
+    consoleLog("Creating ROOT Account...");
 
     ApiAccountObj.save().then((data) => {
       if (data === null) {
         let errMessage = "Couldn't create the Root Account.";
-        console.log(errMessage);
+        consoleLog(errMessage);
         reject(errMessage);
         process.exit(1);
       }
       
-      console.log("ROOT Account created successfully...");
+      consoleLog("ROOT Account created successfully...");
 
       let apiSettingsData = {
         companyName: process.env.COMPANY_NAME || null,
@@ -55,30 +55,44 @@ const install = () => new Promise((resolve, reject) => {
         needReboot: false,
         swaggerHost: process.env.SWAGGER_HOST || config.api.host,
         swaggerPort: process.env.SWAGGER_PORT || config.api.port,
-        swaggerPath: process.env.SWAGGER_PATH || "/doc"
+        swaggerPath: process.env.SWAGGER_PATH || "/doc",
+        cache: {
+          enabled: false,
+          prefix: '__rest_api_base__',
+          type: 'redis',
+          redis: {
+            host: 'localhost',
+            port: 7000,
+            pass: "",
+            defaultExpirationTime: 300,
+            randomExpiration: true,
+            randomExpirationMinNumber: 60,
+            randomExpirationMaxNumber: 600
+          }
+        }
       };
 
       let apiSettingsObj = new ApiSettingsModel(apiSettingsData);
       
-      console.log("Creating API Settings...");
+      consoleLog("Creating API Settings...");
 
       apiSettingsObj.save().then((data) => {
         if (data === null) {
           let errMessage = "Couldn't create the Api Settings.";
-          console.log(errMessage);
+          consoleLog(errMessage);
           reject(errMessage);
           process.exit(1);
         }
 
-        console.log("API Settings created successfully...");
-        console.log("Installation completed successfully.");
+        consoleLog("API Settings created successfully...");
+        consoleLog("Installation completed successfully.");
 
         resolve(data);
       })
     })
   } catch (err) {
-    console.log("Couldn't install the " + apiName);
-    console.log(err);
+    consoleLog("Couldn't install the " + apiName);
+    consoleLog(err);
 
     reject(err);
   }

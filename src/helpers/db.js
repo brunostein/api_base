@@ -7,19 +7,18 @@
 
 const mongoose = require('mongoose');
 
-const initMongoDBConnection = (uri, options={}, callback) => {
+const ApiDBConnection = (uri, options={}, callback) => {
   mongoose.connect(uri, options);
 
   let db = mongoose.connection;
 
   db.on('error', function (err) {
-    console.log('MONGODB: Failed to connect to database');
+    consoleLog('MONGODB: Failed to connect to database');
   });
 
   db.once('open', function () {
-    console.log("MONGODB: Connected to database");
     callback();
   });
 };
 
-module.exports = initMongoDBConnection;
+module.exports = ApiDBConnection;

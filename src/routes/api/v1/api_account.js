@@ -9,6 +9,7 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const ApiAccountController = require("../../../controllers/api_account");
+const cacheMiddleware = require("../../../middlewares/cache");
 require('../../../config/passport')(passport);
 
 /**
@@ -61,7 +62,7 @@ router.post('/signin', ApiAccountController.signIn);
  *             scheme:
  *               type: array
 */
-router.get('/get', passport.authenticate('jwt', { session: false }), ApiAccountController.getAll);
+router.get('/get', passport.authenticate('jwt', { session: false }), cacheMiddleware(), ApiAccountController.getAll);
 
 /**
  * @swagger
@@ -85,7 +86,7 @@ router.get('/get', passport.authenticate('jwt', { session: false }), ApiAccountC
  *             scheme:
  *               type: object
 */
-router.get('/get/:id', passport.authenticate('jwt', { session: false }), ApiAccountController.getId);
+router.get('/get/:id', passport.authenticate('jwt', { session: false }), cacheMiddleware(), ApiAccountController.getId);
 
 /**
  * @swagger

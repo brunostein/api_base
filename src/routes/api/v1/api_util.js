@@ -9,6 +9,7 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const ApiUtilController = require("../../../controllers/api_util");
+const cacheMiddleware = require("../../../middlewares/cache");
 require('../../../config/passport')(passport);
 
 /**
@@ -26,7 +27,7 @@ require('../../../config/passport')(passport);
  *             scheme:
  *               type: object
 */
-router.get('/ping', passport.authenticate('jwt', { session: false }), ApiUtilController.ping);
+router.get('/ping', passport.authenticate('jwt', { session: false }), cacheMiddleware("300:900"), ApiUtilController.ping);
 
 /**
  * @swagger

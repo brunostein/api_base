@@ -6,74 +6,27 @@
  */
 
 const jwt = require('jsonwebtoken');
-const requestIp = require('request-ip');
 const ApiAccountModel = require("../models/api/api_account.model");
 const ApiSettingsModel = require("../models/api/api_settings.model");
-const ApiAccessesHistoryModel = require("../models/api/api_accesses_history.model");
+const config = require('../config');
+
+const consoleLog = (data) => {
+  let apiName = config.api.name;
+  let apiVersion = config.api.version;
+
+  console.log(`* ${apiName} v${apiVersion}: ${data}`);
+}
 
 const getApiSettings = async () => {
   let settings = await ApiSettingsModel.findOne();
   return settings;
 }
 
-const apiMiddleware = async (req, res, next) => {
-  try {
-    let url = req.originalUrl || req.url;
-
-    if (!url.match("/api") || url.match("/accounts/signup")) {
-      next();
-    }
-
-    let username = null;
-
-    if (url.match("/accounts/signin") ||
-      url.match("/accounts/refresh-token")) {
-      if (req.body.username !== undefined) {
-        username = req.body.username;
-      }
-    } else {
-      let authorizationData = await getAuthorizationInfo(req.headers);
-      if (authorizationData !== null && authorizationData.username !== undefined) {
-        username = authorizationData.username;
-      }
-    }
-
-    if (username === null) {
-      next();
-    }
-
-    // STORE ACCESSES HISTORY
-    if (global.apiSettings.storeAccessesHistoryEnabled === "on") {
-      let historyData = {
-        username,
-        api_endpoint: url,
-        ipaddress: requestIp.getClientIp(req) || null
-      };
-
-      await ApiAccessesHistoryModel.create(historyData);
-    }
-
-    // Check Blocked Account
-    ApiAccountModel.findOne({ username: username }).then((apiAccount) => {
-      if (apiAccount === null) {
-        return res.status(201).send({ success: false, msg: "Api Account not found." });
-      }
-      if (apiAccount.blocked === true) {
-        return res.status(201).send({ success: false, msg: "Api Account blocked." }); 
-      }
-      next();
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(400).send(err);
-  }
-}
-
 const checkScope = async function (username, scope) {
   try {
     let search = {
       username: username
-    }
+    };
     let apiAccount = await ApiAccountModel.findOne(search);
 
     if (apiAccount === null) {
@@ -82,7 +35,7 @@ const checkScope = async function (username, scope) {
       return true;
     }
   } catch (err) {
-    console.log(err);
+    consoleLog(err);
   }
 
   return false;
@@ -116,7 +69,7 @@ const getToken = function (headers) {
       }
     }
   } catch (err) {
-    console.log(err);
+    consoleLog(err);
   }
 
   return null;
@@ -130,8 +83,8 @@ const resetNeedReboot = async (reboot = false) => {
 }
 
 const apiHelper = {
+  consoleLog,
   getApiSettings,
-  apiMiddleware,
   checkScope,
   checkSystemScope,
   getAuthorizationInfo,

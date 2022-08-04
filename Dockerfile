@@ -3,7 +3,9 @@ FROM node:alpine
 # Update
 RUN apk add --update nodejs
 
-WORKDIR /api_base
+COPY ./src /rest_api_base
+
+WORKDIR /rest_api_base
 
 # Install app dependencies
 RUN npm install

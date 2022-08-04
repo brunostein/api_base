@@ -58,7 +58,7 @@ const ApiAccountController = {
         });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't get the Api Account." });
     }
   },
@@ -79,7 +79,7 @@ const ApiAccountController = {
         });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't get the Api Accounts." });
     }
   },
@@ -140,7 +140,7 @@ const ApiAccountController = {
           });
         });
       } catch (err) {
-        console.log(err);
+        consoleLog(err);
         return res.status(500).send({ success: false, msg: "Couldn't create the Api Account." });
       }
     }
@@ -213,7 +213,7 @@ const ApiAccountController = {
           });
         });
       } catch (err) {
-        console.log(err);
+        consoleLog(err);
         return res.status(500).send({ success: false, msg: "Authenticate failed." });
       }
     }
@@ -297,7 +297,7 @@ const ApiAccountController = {
           });
         });
       } catch (err) {
-        console.log(err);
+        consoleLog(err);
         return res.status(500).send({ success: false, msg: "Access Token Refresh failed." });
       }
     }
@@ -353,7 +353,7 @@ const ApiAccountController = {
           });
         });
       } catch (err) {
-        console.log(err);
+        consoleLog(err);
         return res.status(500).send({ success: false, msg: "Couldn't revoke the Refresh Token." });
       }
     }
@@ -429,7 +429,7 @@ const ApiAccountController = {
           });
         });
       } catch (err) {
-        console.log(err);
+        consoleLog(err);
         return res.status(500).send({ success: false, msg: "Couldn't update Api Account." });
       }
     }
@@ -463,7 +463,7 @@ const ApiAccountController = {
         });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't block the Api Account." });
     }
   },
@@ -496,7 +496,7 @@ const ApiAccountController = {
         });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't unblock the Api Account." });
     }
   },
@@ -534,7 +534,7 @@ const ApiAccountController = {
         });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't remove the Api Account." });
     }
   }

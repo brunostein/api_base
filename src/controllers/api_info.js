@@ -5,6 +5,7 @@
  * Written by Bruno B. Stein <bruno.stein@tifx.com.br>, 2021
  */
 
+const fs = require('fs');
 const config = require("../config");
 const apiHelper = require('../helpers/api');
 
@@ -17,7 +18,10 @@ const ApiInfoController = {
           return res.status(201).send({ success: false, msg: "Permission denied." });
         }
 
+        let uptime = process.uptime();
+
         let info = {
+          uptime,
           api: config.api,
           settings: await apiHelper.getApiSettings()
         };
@@ -25,8 +29,20 @@ const ApiInfoController = {
         return res.status(201).send({ success: true, data: info });
       });
     } catch (err) {
-      console.log(err);
+      consoleLog(err);
       return res.status(500).send({ success: false, msg: "Couldn't get the Api Info." });
+    }
+  },
+
+  getRoutes: (req, res) => {
+    try {
+      let routesJSON = fs.readFileSync(`${config.rootPath}/routes.json`);
+      let routes = JSON.parse(routesJSON);
+
+      return res.status(201).send({ success: true, data: routes });
+    } catch (err) {
+      consoleLog(err);
+      return res.status(500).send({ success: false, msg: "Error get Server uptime." });
     }
   },
 

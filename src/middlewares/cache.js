@@ -1,0 +1,53 @@
+/**
+ * TIFX Technologies
+ * Copyright (c) 2014-2022 - All rights reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Written by Bruno B. Stein <bruno.stein@tifx.com.br>, 2022
+ */
+
+const cacheMiddleware = (expirationTimeInSeconds = null) => {
+  return apiCacheMiddleware = async (req, res, next) => {
+    try {
+      // Client does not want cache
+      if (req.query.nocache) {
+        next();
+        return;
+      }
+
+      let cacheSettings = global.apiSettings.cache;
+
+      if (cacheSettings.enabled === true) {
+        // RETURN DATA FROM CACHE
+        let key = global.apiCache.getRequestCacheKey(req);
+        let cacheData = await global.apiCache.get(key);
+
+        if (cacheData) {
+          consoleLog(`CACHED: ${key}`);
+          res.set('rest-api-base-cache', key);
+          return res.status(201).send(cacheData);
+        }
+
+        // SET CACHE OF REQUEST
+        let oldSend = res.send;
+
+        res.send = async function(body) {
+          let cacheData = {
+            datetime: Date.now(),
+            data: body
+          };
+
+          await global.apiCache.set(key, JSON.stringify(cacheData), expirationTimeInSeconds);
+
+          res.send = oldSend;
+          return res.send(body);
+        }
+      }
+    } catch (err) {
+      consoleLog(err);
+    }
+
+    next();
+  }
+}
+
+module.exports = cacheMiddleware;

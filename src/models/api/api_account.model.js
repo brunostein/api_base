@@ -7,7 +7,7 @@
 
 const mongoose = require("mongoose");
 
-const apiAccountSchema =  {
+const ApiAccountSchema = new mongoose.Schema({
   email: { type: String, required: false, unique: true },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -20,12 +20,9 @@ const apiAccountSchema =  {
     total_failed: { type: Number, default: 0 },
     last: { type: Date }
   }
-};
-
-const ApiAccountSchema = new mongoose.Schema(
-  apiAccountSchema, 
-  {timestamps: true}
-);
+}, {
+  timestamps: true
+});
 
 ApiAccountSchema.index({username: 1});
 ApiAccountSchema.index({username: 1, password: 1});

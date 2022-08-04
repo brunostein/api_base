@@ -7,7 +7,7 @@
 
 const mongoose = require("mongoose");
 
-const apiSettingsSchema =  {
+const ApiSettingsSchema = new mongoose.Schema({
   companyName: { type: String, required: false },
   companyWebsite: { type: String, required: false },
   companySupportEmail: { type: String, required: false },
@@ -23,12 +23,23 @@ const apiSettingsSchema =  {
   needReboot: { type: Boolean, default: false },
   swaggerHost: { type: String, default: null },
   swaggerPort: { type: String, default: null },
-  swaggerPath: { type: String, default: null }
-};
-
-const ApiSettingsSchema = new mongoose.Schema(
-  apiSettingsSchema, 
-  {timestamps: true}
-);
+  swaggerPath: { type: String, default: null },
+  cache: {
+    enabled: { type: Boolean, default: false },
+    prefix: { type: String, default: '__rest_api_base__' },
+    type: { type: String },
+    redis: {
+      host: { type: String },
+      port: { type: Number },
+      pass: { type: String },
+      defaultExpirationTime: { type: Number },
+      randomExpiration: { type: Boolean, default: true },
+      randomExpirationMinNumber: { type: Number, default: 60 },
+      randomExpirationMaxNumber: { type: Number, default: 600 },
+    }
+  }
+}, {
+  timestamps: true
+});
 
 module.exports = mongoose.model("api_settings", ApiSettingsSchema);
