@@ -28,7 +28,7 @@ const cacheMiddleware = (expirationTimeInSeconds = null) => {
         }
 
         // SET CACHE OF REQUEST
-        let oldSend = res.send;
+        res.oldSend = res.send;
 
         res.send = async function(body) {
           let cacheData = {
@@ -37,9 +37,7 @@ const cacheMiddleware = (expirationTimeInSeconds = null) => {
           };
 
           await global.apiCache.set(key, JSON.stringify(cacheData), expirationTimeInSeconds);
-
-          res.send = oldSend;
-          return res.send(body);
+          return res.oldSend(body);
         }
       }
     } catch (err) {

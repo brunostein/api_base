@@ -7,10 +7,11 @@ services:
             context: .
         image: img-rest-api-base
         restart: unless-stopped
-        env_file: ./src/.env
+        env_file: ./.env
         volumes:
             - ./src:/rest_api_base
             - /rest_api_base/node_modules
+            - ./data/log:/rest_api_base/log
         ports:
             - 4000:4000
         depends_on:
@@ -21,10 +22,20 @@ services:
         container_name: rest-api-base-db
         restart: unless-stopped
         environment:
-            - MONGO_INITDB_ROOT_USERNAME=your_mongodb_username
-            - MONGO_INITDB_ROOT_PASSWORD=your_mongodb_password
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=toor
         volumes:
-            - dbdata:/data/db
+            - ./data/db:/data/db
+
+    cache:
+        container_name: rest-api-base-cache
+        image: redis
+        command: ["redis-server", "--appendonly", "yes"]
+        ports:
+            - 7001:6379
+        volumes:
+            - ./data/cache:/data
+        restart: unless-stopped
 
 volumes:
-  dbdata:
+  data:

@@ -16,6 +16,7 @@ const install = () => new Promise((resolve, reject) => {
 
     consoleLog("Installing " + apiName + "...");
 
+    // Root account to management the API
     let userData = {
       email: process.env.API_ROOT_ACCOUNT_EMAIL,
       username: process.env.API_ROOT_ACCOUNT_USER,
@@ -39,6 +40,7 @@ const install = () => new Promise((resolve, reject) => {
       
       consoleLog("ROOT Account created successfully...");
 
+      // API settings based on .env file
       let apiSettingsData = {
         companyName: process.env.COMPANY_NAME || null,
         companyWebsite: process.env.COMPANY_WEBSITE || null,
@@ -57,24 +59,24 @@ const install = () => new Promise((resolve, reject) => {
         swaggerPort: process.env.SWAGGER_PORT || config.api.port,
         swaggerPath: process.env.SWAGGER_PATH || "/doc",
         cache: {
-          enabled: false,
-          prefix: '__rest_api_base__',
-          type: 'redis',
+          enabled: process.env.CACHE_ENABLED,
+          prefix: process.env.CACHE_PREFIX,
+          type: process.env.CACHE_TYPE,
           redis: {
-            host: 'localhost',
-            port: 7000,
-            pass: "",
-            defaultExpirationTime: 300,
-            randomExpiration: true,
-            randomExpirationMinNumber: 60,
-            randomExpirationMaxNumber: 600
+            host: process.env.CACHE_REDIS_HOST,
+            port: process.env.CACHE_REDIS_PORT,
+            pass: process.env.CACHE_REDIS_PASS,
+            defaultExpirationTime: process.env.CACHE_REDIS_EXPIRATION_TIME,
+            randomExpiration: process.env.CACHE_REDIS_RANDOM_EXPIRATION,
+            randomExpirationMinNumber: process.env.CACHE_REDIS_RANDOM_EXPIRATION_MIN_TIME,
+            randomExpirationMaxNumber: process.env.CACHE_REDIS_RANDOM_EXPIRATION_MAX_TIME
           }
         }
       };
 
       let apiSettingsObj = new ApiSettingsModel(apiSettingsData);
       
-      consoleLog("Creating API Settings...");
+      consoleLog("Creating API Settings from .env file...");
 
       apiSettingsObj.save().then((data) => {
         if (data === null) {

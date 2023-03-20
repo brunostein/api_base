@@ -6,6 +6,7 @@
  */
 
 const fs = require('fs');
+const osu = require('node-os-utils')
 const config = require("../config");
 const apiHelper = require('../helpers/api');
 
@@ -18,9 +19,18 @@ const ApiInfoController = {
           return res.status(201).send({ success: false, msg: "Permission denied." });
         }
 
-        let uptime = process.uptime();
-
+        let uptime = osu.os.uptime();
+        let cpuInfo = {
+          usage: await osu.cpu.usage(),
+          average: await osu.cpu.average(),
+          free: await osu.cpu.free(),
+          count: await osu.cpu.count()
+        };
+ 
         let info = {
+          system: {
+            cpu: cpuInfo
+          },
           uptime,
           api: config.api,
           settings: await apiHelper.getApiSettings()
