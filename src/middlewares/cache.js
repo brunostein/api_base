@@ -24,6 +24,8 @@ const cacheMiddleware = (expirationTimeInSeconds = null) => {
         if (cacheData) {
           consoleLog(`CACHED: ${key}`);
           res.set('rest-api-base-cache', key);
+          res.set('rest-api-base-cache-at', cacheData.datetime);
+          res.set('rest-api-base-cache-exp-sec', cacheData.expirationTimeSeconds);
           return res.status(201).send(cacheData);
         }
 
@@ -33,6 +35,7 @@ const cacheMiddleware = (expirationTimeInSeconds = null) => {
         res.send = async function(body) {
           let cacheData = {
             datetime: Date.now(),
+            expirationTimeSeconds: expirationTimeInSeconds,
             data: body
           };
 

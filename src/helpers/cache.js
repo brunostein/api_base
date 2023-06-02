@@ -83,7 +83,7 @@ class ApiCache {
 
       if (cacheData) {
         let response = JSON.parse(cacheData);
-        return response.data;
+        return response;
       }
     }
   }
